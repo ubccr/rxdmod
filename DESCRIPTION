@@ -1,0 +1,18 @@
+Package: rxdmod
+Title: XDMoD Data Analytics Framework
+Version: 1.0.0
+Authors@R:
+  c(
+    person("Nikolay", "Simakov", , "nikolays@buffalo.edu",
+           role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-6131-5979")),
+    person("Aaron", "Weeden", email = "aaronwee@buffalo.edu", role = c("aut")),
+    person("Joseph", "White", email = "jpwhite4@buffalo.edu", role = c("aut"))
+  )
+Description: As part of the XDMoD Data Analytics Framework, this R package
+    provides API access to the data warehouse of an instance of
+    XDMoD version ≥10.5.
+License: LGPL-3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3

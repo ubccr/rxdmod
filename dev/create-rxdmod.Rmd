@@ -1,0 +1,43 @@
+---
+title: "Creating RXDMoD"
+author: "Nikolay simakov"
+date: "2024/3/27"
+---
+
+Following <https://r-pkgs.org/>
+
+
+```r
+library(devtools)
+packageVersion("devtools")
+create_package("rxdmod")
+```
+
+that created package and new rstudio session
+
+
+```r
+use_lgpl_license(version = 3, include_future = F)
+use_git()
+```
+
+```{r setup}
+library(devtools)
+```
+
+```{r eval=F}
+use_r("warehouse")
+```
+
+
+```{r}
+load_all()
+
+```
+
+
+```{r}
+# Initialize the XDMoD Data Warehouse
+dw <- xdmod_get_datawarehouse('https://xdmod.access-ci.org')
+dw
+```
