@@ -78,6 +78,7 @@ xdmod_get_data <- function(
   df <- df$reset_index()
   df$Time <- df$Time$dt$strftime('%Y/%m/%d')
   df <- reticulate::py_to_r(df)
+  # no need for pandas.index it was already df$reset_index()
   attr(df,'pandas.index') <- NULL
   df |> tibble::tibble() |> # use newer data.frame
     dplyr::mutate(Time=lubridate::ymd(Time)) # convert character to date

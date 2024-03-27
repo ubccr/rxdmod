@@ -95,6 +95,9 @@ library(reticulate)
 use_condaenv("xdmod-notebooks")
 # on windows ~ points to Documents, adjust accordently
 #load_dot_env(path.expand("~/xdmod-data.env"))
+
+use_readme_rmd()
+devtools::build_readme()
 ```
 
 
@@ -119,4 +122,10 @@ testthat::expect_equal(df,df2)
 attr(df,'pandas.index') <- NULL
 dput(as_tibble(df))
 row.names(df)
+```
+
+
+```{r}
+install()
+remove.packages("rxdmod")
 ```
