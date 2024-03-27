@@ -6,7 +6,19 @@ date: "2024/3/27"
 
 Following <https://r-pkgs.org/>
 
+# Creating dev-env
 
+on top of xdmod-notebooks anacondas environment (which included python, R and rstudio)
+
+```bash
+conda activate xdmod-notebooks
+# for some reason need compilers for dev-env
+conda install -y gxx_linux-64 gcc_linux-64
+
+conda install -y r-roxygen2
+```
+
+# Creating package
 ```r
 library(devtools)
 packageVersion("devtools")
@@ -40,4 +52,71 @@ load_all()
 # Initialize the XDMoD Data Warehouse
 dw <- xdmod_get_datawarehouse('https://xdmod.access-ci.org')
 dw
+```
+
+How to write docs: <https://roxygen2.r-lib.org/>
+
+Call to document() updates the NAMESPACE file, based on @export tags
+
+```{r}
+check()
+document()
+?xdmod_get_datawarehouse
+```
+
+```{r eval=F}
+use_testthat()
+```
+
+```{r eval=F}
+use_test("xdmod_get_datawarehouse")
+
+```
+
+```{r eval=F}
+use_package("reticulate")
+use_package("tibble")
+use_package("dplyr")
+use_package("lubridate")
+use_pipe(export = TRUE)
+```
+
+See <https://rstudio.github.io/reticulate/articles/package.html> on reticulate
+usage in packages
+
+```{r eval=F}
+library(tidyverse)
+library(plotly)
+#library(knitr)
+#library(rmarkdown)
+
+# replace xdmod-notebooks with conda enviroment for python to use
+library(reticulate)
+use_condaenv("xdmod-notebooks")
+# on windows ~ points to Documents, adjust accordently
+#load_dot_env(path.expand("~/xdmod-data.env"))
+```
+
+
+```{r}
+# Initialize the XDMoD Data Warehouse
+dw <- xdmod_get_datawarehouse('https://xdmod.access-ci.org')
+```
+
+```{r}
+df <- xdmod_get_data(dw,
+        duration=c('2023-01-01', '2023-01-07'),
+        realm='Jobs',
+        metric='Number of Users: Active'
+    )
+df
+df2 <- structure(list(Time = structure(c(19358, 19359, 19360, 19361, 
+19362, 19363, 19364), class = "Date"), `Number of Users: Active` = c(378, 
+459, 555, 618, 633, 645, 485)), class = c("tbl_df", "tbl", "data.frame"
+), row.names = c(NA, -7L))
+
+testthat::expect_equal(df,df2)
+attr(df,'pandas.index') <- NULL
+dput(as_tibble(df))
+row.names(df)
 ```
