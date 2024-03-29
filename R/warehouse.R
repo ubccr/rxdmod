@@ -1,6 +1,3 @@
-
-
-
 #' Get XDMoD data-warehouse connector
 #'
 #' Get XDMoD data-warehouse connector.
@@ -9,6 +6,8 @@
 #' Get the token from your XDMoD instance and store in ~/.Renviron (~/Documents/.Renviron on windows) as:
 #'
 #' `XDMOD_API_TOKEN=<secret key>`
+#'
+#' `vignette("XDMoD-Data-First-Example")`
 #'
 #' @param xdmod_host URL to XDMoD instance, for example 'https://xdmod.access-ci.org'
 #'
@@ -42,6 +41,13 @@ xdmod_get_datawarehouse <- function(xdmod_host) {
 #' `XDMOD_API_TOKEN=<secret key>`
 #'
 #' @param datawarehouse XDMoD connector
+#' @param duration
+#' @param realm
+#' @param metric
+#' @param dimension
+#' @param filters
+#' @param dataset_type
+#' @param aggregation_unit
 #'
 #' @return data frame with requested data
 #' @export
@@ -59,19 +65,33 @@ xdmod_get_data <- function(
     duration='Previous month',
     realm='Jobs',
     metric='CPU Hours: Total',
-    dimension='None',
-    filters=list(),
+    dimension=NULL,
+    filters=NULL,
     dataset_type='timeseries',
-    aggregation_unit='Auto'
+    aggregation_unit='Auto',
+    strings_as_factors=FALSE
 ) {
   # @TODO: check duration format
+  if(!is.null(dimension)) {
+    m_dimension <- dimension
+  } else {
+    m_dimension <- "None"
+  }
+
+  if(!is.null(filters)) {
+    m_filters <- filters
+  } else {
+    m_filters <- list()
+  }
+
+
   with(datawarehouse$datawarehouse, {
     df <- datawarehouse$datawarehouse$get_data(
       duration=duration,
       realm=realm,
       metric=metric,
-      dimension=dimension,
-      filters=list(),
+      dimension=m_dimension,
+      filters=m_filters,
       dataset_type=dataset_type,
       aggregation_unit=aggregation_unit
     )})
@@ -80,6 +100,16 @@ xdmod_get_data <- function(
   df <- reticulate::py_to_r(df)
   # no need for pandas.index it was already df$reset_index()
   attr(df,'pandas.index') <- NULL
-  df |> tibble::tibble() |> # use newer data.frame
+  df <- df |> tibble::tibble() |> # use newer data.frame
     dplyr::mutate(Time=lubridate::ymd(Time)) # convert character to date
+
+  if(!is.null(dimension)) {
+    df <- df |> pivot_longer(-Time, names_to=dimension, values_to=metric)
+
+    if(strings_as_factors) {
+      df[dimension] <- as.factor(df[dimension])
+    }
+  }
+
+  df
 }

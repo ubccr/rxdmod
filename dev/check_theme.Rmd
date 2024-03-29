@@ -1,0 +1,74 @@
+---
+title: "Check theme"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_float: yes
+    toc_depth: 4
+    mathjax: null
+  pdf_document: default
+date: "2024/3/27"
+---
+
+```{r setup, include=T}
+# load libraries
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(plotly)
+#library(knitr)
+#library(rmarkdown)
+
+# replace xdmod-notebooks with conda enviroment for python to use
+library(reticulate)
+use_condaenv("xdmod-notebooks")
+# on windows ~ points to Documents, adjust accordently
+#load_dot_env(path.expand("~/xdmod-data.env"))
+#library(rxdmod)
+load_all()
+```
+
+
+```{r}
+dw <- xdmod_get_datawarehouse('https://xdmod.access-ci.org')
+
+df <- xdmod_get_data(dw,
+        duration=c('2023-01-01', '2023-03-31'),
+        realm='Jobs',
+        metric='CPU Hours: Total',
+        dimension='Resource',
+    )
+df
+```
+Use XMoD color scheme on one plot
+
+```{r}
+# Use on one plot
+ggplot(df,aes(x=Time, y=`CPU Hours: Total`, color=Resource)) + geom_line() + theme_xdmod()
+
+# Use only color scale on one plot (also see scale_fill_xdmod)
+ggplot(df,aes(x=Time, y=`CPU Hours: Total`, color=Resource)) + geom_line() + scale_color_xdmod()
+```
+
+Set XMoD color globally
+
+```{r}
+# regular
+ggplot(df,aes(x=Time, y=`CPU Hours: Total`, color=Resource)) + geom_line()
+
+# theme_xdmod
+theme_set(theme_xdmod())
+ggplot(df,aes(x=Time, y=`CPU Hours: Total`, color=Resource)) + geom_line()
+
+# reset theme
+theme_set(theme_grey())
+xdmod_reset_colors()
+ggplot(df,aes(x=Time, y=`CPU Hours: Total`, color=Resource)) + geom_line()
+
+# Just set colors
+xdmod_set_colors()
+ggplot(df,aes(x=Time, y=`CPU Hours: Total`, color=Resource)) + geom_line()
+xdmod_reset_colors()
+```
+
+

@@ -17,6 +17,8 @@ xdmod_get_data(
 }
 \arguments{
 \item{datawarehouse}{XDMoD connector}
+
+\item{aggregation_unit}{}
 }
 \value{
 data frame with requested data

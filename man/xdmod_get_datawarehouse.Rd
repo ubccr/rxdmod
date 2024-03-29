@@ -20,6 +20,8 @@ Enviroment variable \code{XDMOD_API_TOKEN} should contain XDMoD API token.
 Get the token from your XDMoD instance and store in ~/.Renviron (~/Documents/.Renviron on windows) as:
 
 \verb{XDMOD_API_TOKEN=<secret key>}
+
+\code{vignette("XDMoD-Data-First-Example")}
 }
 \examples{
 dw <- xdmod_get_datawarehouse('https://xdmod.access-ci.org')

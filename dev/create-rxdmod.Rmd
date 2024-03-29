@@ -39,6 +39,9 @@ library(devtools)
 
 ```{r eval=F}
 use_r("warehouse")
+use_r("get_data")
+use_r("get_rawdata")
+use_r("theme")
 ```
 
 
@@ -78,7 +81,16 @@ use_package("reticulate")
 use_package("tibble")
 use_package("dplyr")
 use_package("lubridate")
-use_pipe(export = TRUE)
+
+use_pipe(export = T)
+
+use_package("ggplot2")
+use_package("scales")
+use_package("scales")
+use_package("scales")
+use_package("scales")
+
+
 ```
 
 See <https://rstudio.github.io/reticulate/articles/package.html> on reticulate
@@ -95,7 +107,11 @@ library(reticulate)
 use_condaenv("xdmod-notebooks")
 # on windows ~ points to Documents, adjust accordently
 #load_dot_env(path.expand("~/xdmod-data.env"))
+#library(rxdmod)
+load_all()
+```
 
+```{r}
 use_readme_rmd()
 devtools::build_readme()
 ```
@@ -128,4 +144,29 @@ row.names(df)
 ```{r}
 install()
 remove.packages("rxdmod")
+
+load_all()
+
+usethis::use_vignette("XDMoD-Data-First-Example")
+```
+
+```{r}
+df <- xdmod_get_data(dw,
+        duration=c('2023-01-01', '2023-01-07'),
+        realm='Jobs',
+        metric='Number of Users: Active'
+    )
+dw <- xdmod_get_datawarehouse('https://xdmod.access-ci.org')
+df <- xdmod_get_data(dw,
+        duration=c('2023-01-01', '2023-03-31'),
+        realm='Jobs',
+        metric='CPU Hours: Total',
+        dimension='Resource',
+    )
+df
+
+#theme_set(theme_grey())
+#xdmod_set_colors()
+
+ggplot(df,aes(x=Time, y=`CPU Hours: Total`, color=Resource)) + geom_line()
 ```

@@ -37,7 +37,7 @@ devtools::install_github("ubccr/rxdmod")
 
 ## Example
 
-```{r example}
+```{r example,results='hide',message=FALSE,warning=FALSE}
 library(tidyverse)
 library(plotly)
 
@@ -58,7 +58,6 @@ df <- xdmod_get_data(dw,
         realm='Jobs',
         metric='Number of Users: Active'
     )
-df |> head()
 ```
 
 Plot the data

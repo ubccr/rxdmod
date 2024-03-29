@@ -1,0 +1,290 @@
+---
+title: "XDMoD-Data-First-Example R-API"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{XDMoD-Data-First-Example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  fig.width=7,
+  fig.height=5,
+  #collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Prerequisits
+
+This example use python API for XDMoD analytic framework.
+So you already need to have installed python version. 
+In R you should install `reticulate` library and bound the python with XDMoD framework.
+
+## Quick Conda Install
+
+Here is a quick tip on installation (tested in WSL ubuntu)
+
+```bash
+conda install requests
+conda create -n xdmod-notebooks -y python=3.11 r=4.3
+conda activate xdmod-notebooks
+# base-notebook
+conda install -y 'jupyterlab' 'notebook' 'jupyterhub' 'nbclassic'
+# scipy-notebook
+conda install -y  'altair' 'beautifulsoup4' 'bokeh' 'bottleneck' 'cloudpickle' \
+    'conda-forge::blas=*=openblas' \
+    'cython' 'dask' 'dill' 'h5py' 'ipympl' 'ipywidgets' 'jupyterlab-git' \
+    'matplotlib-base' 'numba' 'numexpr' 'openpyxl' 'pandas' 'patsy' 'protobuf' \
+    'pytables' 'scikit-image' 'scikit-learn' 'scipy' 'seaborn' 'sqlalchemy' \
+    'statsmodels' 'sympy' 'widgetsnbextension' 'xlrd'
+# r-notebook
+conda install -y 'r-base' 'r-caret' 'r-crayon' 'r-devtools' 'r-e1071' \
+    'r-forecast' 'r-hexbin' 'r-htmltools' 'r-htmlwidgets' 'r-irkernel' \
+    'r-nycflights13' 'r-randomforest' 'r-rcurl' 'r-rmarkdown' 'r-rodbc' \
+    'r-rsqlite' 'r-shiny' 'r-tidymodels' 'r-tidyverse' 'unixodbc'
+
+# Other
+conda install -y 'pymysql' 'requests' \
+    'r-plotly' 'r-repr' 'r-irdisplay' 'r-pbdzmq' 'r-reticulate' 'r-cowplot' \
+    'r-rjson' 'r-dotenv'
+```
+
+Install rstudio server:
+
+```bash
+wget -q "https://download2.rstudio.org/server/jammy/amd64/rstudio-server-2023.12.1-402-amd64.deb"
+sudo dpkg -i rstudio-server-*-amd64.deb
+rm rstudio-server-*-amd64.deb
+
+# specify which version of r to use
+echo "rsession-which-r=$(which R)" | sudo tee -a /etc/rstudio/rserver.conf
+```
+
+Alternatively you can install regular rstudio:
+
+```bash
+wget https://download1.rstudio.org/electron/jammy/amd64/rstudio-2023.12.1-402-amd64.deb
+sudo dpkg -i rstudio-2023.12.1-402-amd64.deb
+rm rstudio-*-amd64.deb
+```
+
+
+Finally, install xdmod-data python API:
+
+```bash
+pip install --upgrade 'xdmod-data>=1.0.0,<2.0.0' python-dotenv tabulate
+```
+
+Launch rserver at <http://localhost:8787>
+
+## Obtain an XDMoD-API token
+
+You will need to get XDMoD-API token in order to access XDMoD Analytical Framework.
+Follow [these instructions](https://github.com/ubccr/xdmod-data#api-token-access) to obtain an API token.
+Write the token to `~/xdmod-data.env` file. It will be loaded soon and you would not need to keep token in Rmarkdown file
+
+```bash
+cat >> ~/.Renviron << EOF
+XDMOD_API_TOKEN=<my secret xdmod api token>
+EOF
+```
+# Use XDMoD Analytical Framework as Python API
+
+`rxdmod` uses the Python API through `reticulate` R library.
+So it is importent to load `reticulate` then python with 'xdmod-data' installed.
+
+
+```{r results='hide',message=FALSE,warning=FALSE}
+# load libraries
+library(tidyverse)
+library(plotly)
+
+library(reticulate)
+use_condaenv("xdmod-notebooks")
+
+library(rxdmod)
+```
+
+
+
+First, initialize the XDMoD Data Warehouse.
+Run the code below to prepare for getting data from the XDMoD data warehouse at the given URL.
+
+```{r}
+# Initialize the XDMoD Data Warehouse
+dw <- xdmod_get_datawarehouse('https://xdmod.access-ci.org')
+```
+
+Next, get the data.
+Run the code below to use the `get_data()` method to request data from XDMoD and load them into a DataFrame. This example gets the number of active users of ACCESS-allocated resources over a 4-month period. Each of the parameters of the method will be explained later in this notebook
+
+```{r}
+df <- xdmod_get_data(dw,
+        duration=c('2023-01-01', '2023-04-30'),
+        realm='Jobs',
+        metric='Number of Users: Active'
+    )
+df
+```
+
+Plot the data
+
+```{r}
+# plot
+ggplotly(
+    ggplot(df, aes(x=Time,y=`Number of Users: Active`)) +
+        geom_line()
+)
+```
+
+## Do further data processing
+You can do further processing on the DataFrame to produce analysis and plots beyond those that are available in the XDMoD portal.
+
+Run the code below to add a column for the day of the week:
+
+```{r}
+df$weekday <- factor(
+    weekdays(df$Time), 
+    levels=c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", 
+             "Saturday", "Sunday"))
+df
+```
+
+Run the code below to show a box plot of the data grouped by day of the week:
+
+```{r}
+ggplotly(
+    ggplot(df, aes(x=weekday,y=`Number of Users: Active`)) +
+        geom_boxplot()
+)
+```
+
+# Details of the `xdmod_get_data()` method
+Now that you have seen a basic example of using the `xdmod_get_data()` method, read below for more details on how it works.
+
+## Default parameters
+
+The `xdmod_get_data()` method has a number of parameters; their default values are shown below, and the parameters are explained in more detail further below.
+
+```{r}
+df <- xdmod_get_data(dw,
+        duration='Previous month',
+        realm='Jobs',
+        metric='CPU Hours: Total',
+        dimension='None',
+        filters=list(),
+        dataset_type='timeseries',
+        aggregation_unit='Auto'
+    )
+df
+```
+
+## Duration
+
+The **duration** provides the time constraints of the data to be fetched from the XDMoD data warehouse.
+
+As already seen, you can specify the duration as start and end times:
+
+```{r}
+df <- xdmod_get_data(dw, duration=c('2023-01-01', '2023-04-30'))
+df
+```
+
+You can instead specify the duration using a special string value; a list of the valid values can be obtained by calling the `get_durations()` method.
+
+```r
+durations <- xdmod_get_durations(dw)
+durations
+```
+
+## Realm
+
+A **realm** is a category of data in the XDMoD data warehouse.
+You can use the `describe_realms()` method to get a DataFrame containing the list of available realms.
+
+
+```r
+realms <- xdmod_describe_realms(dw)
+realms
+```
+
+## Metric
+
+A **metric** is a statistic for which data exists in a given realm. You can use the `describe_metrics(realm)` method to get a DataFrame containing the list of valid metrics in the given realm. The realm must be passed in as a string.
+
+```r
+metrics <- xdmod_describe_metrics(dw, 'Jobs')
+metrics %>% knitr::kable(format="html")
+```
+
+## Dimension
+A **dimension** is a grouping of data. You can use the `describe_dimensions(realm)` method to get a DataFrame containing the list of valid dimensions in the given realm. The realm must be passed in as a string.
+
+```r
+dimensions <- xdmod_describe_dimensions(dw,'Jobs')
+dimensions %>% knitr::kable(format="html")
+```
+
+## Pass in realms, metrics, and dimensions using labels or IDs
+
+For methods in the API that take realms, metrics, and/or dimensions as arguments, you can pass them in as their labels or their IDs.
+
+```{r}
+df <- xdmod_get_data(dw,
+        duration='10 year',
+        realm='Allocations',
+        metric='NUs: Allocated', # 'allocated_nu' also works
+        dimension='Resource Type',  # 'resource_type' also works
+    )
+df
+```
+
+## Filters
+
+**Filters** allow you to include only data that have certain values for given dimensions. You can use the `get_filter_values(realm, dimension)` method to get a DataFrame containing the list of valid filter values for the given dimension in the given realm. The realm and dimension must be passed in as strings.
+
+```r
+filter_values <- xdmod_get_filter_values(dw, 'Jobs', 'Resource') # 'resource' also works
+filter_values
+```
+
+For methods in the API that take filters as arguments, you must specify the filters as a dictionary in which the keys are dimensions (labels or IDs) and the values are string filter values (labels or IDs) or sequences of string filter values. For example, to return only data for which the field of science is biophysics and the resource is either NCSA Delta GPU or TACC Stampede2:
+
+```{r}
+df <- xdmod_get_data(dw,
+    filters=list(
+        'Field of Science'='Biophysics', # 'fieldofscience': '246' also works
+        'Resource'= c( # 'resource' also works
+            'NCSA DELTA GPU', # '3032' also works
+            'STAMPEDE2 TACC' # '2825' also works
+            )))
+df
+```
+
+## Dataset Type
+The **dataset type** can either be 'timeseries' (the default), in which data is grouped by a time [aggregation unit](#Aggregation-unit), or 'aggregate', in which the data is aggregated across the entire [duration](#Duration). For 'aggregate', the results are returned as a Pandas Series rather than a DataFrame.
+
+```r
+df <- xdmod_get_data(dw, dataset_type='timeseries')
+df
+```
+
+### Aggregation unit
+
+The **aggregation unit** specifies how data is aggregated by time. You can get a list of valid aggregation units by calling the `get_aggregation_units()` method.
+
+```r
+aggregation_units <- xdmod_get_aggregation_units(dw)
+aggregation_units
+```
+
+
+## Additional Examples
+For additional examples, please see the [xdmod-notebooks repository](https://github.com/ubccr/xdmod-notebooks).
+
+---
+XDMoD Data Analytics Framework v1.0.0
+

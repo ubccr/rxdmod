@@ -27,31 +27,7 @@ devtools::install_github("ubccr/rxdmod")
 
 ``` r
 library(tidyverse)
-#> ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-#> ✔ dplyr     1.1.3     ✔ readr     2.1.4
-#> ✔ forcats   1.0.0     ✔ stringr   1.5.0
-#> ✔ ggplot2   3.4.4     ✔ tibble    3.2.1
-#> ✔ lubridate 1.9.3     ✔ tidyr     1.3.0
-#> ✔ purrr     1.0.2     
-#> ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-#> ✖ dplyr::filter() masks stats::filter()
-#> ✖ dplyr::lag()    masks stats::lag()
-#> ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
 library(plotly)
-#> 
-#> Attaching package: 'plotly'
-#> 
-#> The following object is masked from 'package:ggplot2':
-#> 
-#>     last_plot
-#> 
-#> The following object is masked from 'package:stats':
-#> 
-#>     filter
-#> 
-#> The following object is masked from 'package:graphics':
-#> 
-#>     layout
 
 # replace xdmod-notebooks with conda enviroment for python to use
 library(reticulate)
@@ -70,16 +46,6 @@ df <- xdmod_get_data(dw,
         realm='Jobs',
         metric='Number of Users: Active'
     )
-df |> head()
-#> # A tibble: 6 × 2
-#>   Time       `Number of Users: Active`
-#>   <date>                         <dbl>
-#> 1 2023-01-01                       378
-#> 2 2023-01-02                       459
-#> 3 2023-01-03                       555
-#> 4 2023-01-04                       618
-#> 5 2023-01-05                       633
-#> 6 2023-01-06                       645
 ```
 
 Plot the data
