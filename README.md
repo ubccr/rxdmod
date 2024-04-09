@@ -33,7 +33,11 @@ conda install -y  'altair' 'beautifulsoup4' 'bokeh' 'bottleneck' 'cloudpickle' \
     'matplotlib-base' 'numba' 'numexpr' 'openpyxl' 'pandas' 'patsy' 'protobuf' \
     'pytables' 'scikit-image' 'scikit-learn' 'scipy' 'seaborn' 'sqlalchemy' \
     'statsmodels' 'sympy' 'widgetsnbextension' 'xlrd'
+# Other
+conda install -y 'pymysql' 'requests'
 ```
+
+If you don’t have R yet you can install it with conda too:
 
 ``` bash
 # r-notebook  r=4.3
@@ -43,12 +47,55 @@ conda install -y 'r-base' 'r-caret' 'r-crayon' 'r-devtools' 'r-e1071' \
     'r-rsqlite' 'r-shiny' 'r-tidymodels' 'r-tidyverse' 'unixodbc'
 
 # Other
-conda install -y 'pymysql' 'requests' \
+conda install -y \
     'r-plotly' 'r-repr' 'r-irdisplay' 'r-pbdzmq' 'r-reticulate' 'r-cowplot' \
     'r-rjson' 'r-dotenv'
 ```
 
 ### Set up XDMoD API Token
+
+#### Obtain an API token
+
+You will need to get XDMoD-API token in order to access XDMoD Analytical
+Framework.
+
+Follow [these
+instructions](https://github.com/ubccr/xdmod-data#api-token-access) to
+obtain an API token.
+
+#### Store the API token in .Renveron (The R-Way)
+
+Write the token to `~/.Renviron` file:
+
+``` bash
+cat >> ~/.Renviron << EOF
+XDMOD_API_TOKEN=<my secret xdmod api token>
+EOF
+```
+
+It will be loaded automatically (you might need to restart R-session at
+first use).
+
+#### Alternatively Store the API token at Same Place as XDMoD Python API
+
+If you use XDMoD Python API as well then storing token in same file as
+in Python API can be handy.
+
+Write the token to `~/xdmod-data.env` file:
+
+``` bash
+cat >> ~/xdmod-data.env << EOF
+XDMOD_API_TOKEN=<my secret xdmod api token>
+EOF
+```
+
+Load it in your R-session, before calling `xdmod_get_datawarehouse`:
+
+``` r
+library(dotenv)
+# on windows ~ points to Documents, adjust accordingly
+load_dot_env(path.expand("~/xdmod-data.env"))
+```
 
 ### Instal RXMoD
 
@@ -92,4 +139,4 @@ ggplot(df, aes(x=Time,y=`Number of Users: Active`)) +
         geom_line()
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
