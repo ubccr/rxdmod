@@ -9,10 +9,11 @@ xdmod_get_data(
   duration = "Previous month",
   realm = "Jobs",
   metric = "CPU Hours: Total",
-  dimension = "None",
-  filters = list(),
+  dimension = NULL,
+  filters = NULL,
   dataset_type = "timeseries",
-  aggregation_unit = "Auto"
+  aggregation_unit = "Auto",
+  strings_as_factors = FALSE
 )
 }
 \arguments{
