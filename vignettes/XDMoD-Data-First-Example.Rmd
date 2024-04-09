@@ -1,13 +1,23 @@
 ---
 title: "XDMoD-Data-First-Example R-API"
-output: rmarkdown::html_vignette
+output:
+  github_document:
+    df_print: default
+  rmarkdown::html_vignette:
+    df_print: default
 vignette: >
   %\VignetteIndexEntry{XDMoD-Data-First-Example}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+always_allow_html: true
 ---
 
 ```{r, include = FALSE}
+if(knitr::is_latex_output()) {
+} else if(knitr::is_html_output()) {
+} else {
+}
+
 knitr::opts_chunk$set(
   echo = TRUE,
   fig.width=7,
@@ -24,33 +34,6 @@ So you already need to have installed python version.
 In R you should install `reticulate` library and bound the python with XDMoD framework.
 
 ## Quick Conda Install
-
-Here is a quick tip on installation (tested in WSL ubuntu)
-
-```bash
-conda install requests
-conda create -n xdmod-notebooks -y python=3.11 r=4.3
-conda activate xdmod-notebooks
-# base-notebook
-conda install -y 'jupyterlab' 'notebook' 'jupyterhub' 'nbclassic'
-# scipy-notebook
-conda install -y  'altair' 'beautifulsoup4' 'bokeh' 'bottleneck' 'cloudpickle' \
-    'conda-forge::blas=*=openblas' \
-    'cython' 'dask' 'dill' 'h5py' 'ipympl' 'ipywidgets' 'jupyterlab-git' \
-    'matplotlib-base' 'numba' 'numexpr' 'openpyxl' 'pandas' 'patsy' 'protobuf' \
-    'pytables' 'scikit-image' 'scikit-learn' 'scipy' 'seaborn' 'sqlalchemy' \
-    'statsmodels' 'sympy' 'widgetsnbextension' 'xlrd'
-# r-notebook
-conda install -y 'r-base' 'r-caret' 'r-crayon' 'r-devtools' 'r-e1071' \
-    'r-forecast' 'r-hexbin' 'r-htmltools' 'r-htmlwidgets' 'r-irkernel' \
-    'r-nycflights13' 'r-randomforest' 'r-rcurl' 'r-rmarkdown' 'r-rodbc' \
-    'r-rsqlite' 'r-shiny' 'r-tidymodels' 'r-tidyverse' 'unixodbc'
-
-# Other
-conda install -y 'pymysql' 'requests' \
-    'r-plotly' 'r-repr' 'r-irdisplay' 'r-pbdzmq' 'r-reticulate' 'r-cowplot' \
-    'r-rjson' 'r-dotenv'
-```
 
 Install rstudio server:
 
@@ -134,10 +117,8 @@ Plot the data
 
 ```{r}
 # plot
-ggplotly(
-    ggplot(df, aes(x=Time,y=`Number of Users: Active`)) +
-        geom_line()
-)
+ggplot(df, aes(x=Time,y=`Number of Users: Active`)) +
+    geom_line()
 ```
 
 ## Do further data processing
@@ -156,10 +137,8 @@ df
 Run the code below to show a box plot of the data grouped by day of the week:
 
 ```{r}
-ggplotly(
-    ggplot(df, aes(x=weekday,y=`Number of Users: Active`)) +
-        geom_boxplot()
-)
+ggplot(df, aes(x=weekday,y=`Number of Users: Active`)) +
+    geom_boxplot()
 ```
 
 # Details of the `xdmod_get_data()` method

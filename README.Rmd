@@ -24,9 +24,49 @@ XDMoD.
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of rxdmod is to ...
-
 ## Installation
+
+### Install Python API
+
+
+First, you need to install python with pandas.
+Bellow is pandas-jupyter complete environment for data-analysis.
+It is probably overkill for just forwarding requests through XDMoD Python API, but
+it can be a good choice for cross-language developments/work.
+
+```bash
+# create a new conda environment called "xdmod-notebooks"
+conda create -n xdmod-notebooks -y python=3.11
+conda activate xdmod-notebooks
+# base-notebook
+conda install -y 'jupyterlab' 'notebook' 'jupyterhub' 'nbclassic'
+# scipy-notebook
+conda install -y  'altair' 'beautifulsoup4' 'bokeh' 'bottleneck' 'cloudpickle' \
+    'conda-forge::blas=*=openblas' \
+    'cython' 'dask' 'dill' 'h5py' 'ipympl' 'ipywidgets' 'jupyterlab-git' \
+    'matplotlib-base' 'numba' 'numexpr' 'openpyxl' 'pandas' 'patsy' 'protobuf' \
+    'pytables' 'scikit-image' 'scikit-learn' 'scipy' 'seaborn' 'sqlalchemy' \
+    'statsmodels' 'sympy' 'widgetsnbextension' 'xlrd'
+```
+
+```bash
+# r-notebook  r=4.3
+conda install -y 'r-base' 'r-caret' 'r-crayon' 'r-devtools' 'r-e1071' \
+    'r-forecast' 'r-hexbin' 'r-htmltools' 'r-htmlwidgets' 'r-irkernel' \
+    'r-nycflights13' 'r-randomforest' 'r-rcurl' 'r-rmarkdown' 'r-rodbc' \
+    'r-rsqlite' 'r-shiny' 'r-tidymodels' 'r-tidyverse' 'unixodbc'
+
+# Other
+conda install -y 'pymysql' 'requests' \
+    'r-plotly' 'r-repr' 'r-irdisplay' 'r-pbdzmq' 'r-reticulate' 'r-cowplot' \
+    'r-rjson' 'r-dotenv'
+```
+
+
+
+### Set up XDMoD API Token
+
+### Instal RXMoD
 
 You can install the development version of rxdmod from [GitHub](https://github.com/) with:
 
