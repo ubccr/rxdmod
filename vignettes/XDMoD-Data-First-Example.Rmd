@@ -27,55 +27,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Prerequisits
-
-This example use python API for XDMoD analytic framework.
-So you already need to have installed python version. 
-In R you should install `reticulate` library and bound the python with XDMoD framework.
-
-## Quick Conda Install
-
-Install rstudio server:
-
-```bash
-wget -q "https://download2.rstudio.org/server/jammy/amd64/rstudio-server-2023.12.1-402-amd64.deb"
-sudo dpkg -i rstudio-server-*-amd64.deb
-rm rstudio-server-*-amd64.deb
-
-# specify which version of r to use
-echo "rsession-which-r=$(which R)" | sudo tee -a /etc/rstudio/rserver.conf
-```
-
-Alternatively you can install regular rstudio:
-
-```bash
-wget https://download1.rstudio.org/electron/jammy/amd64/rstudio-2023.12.1-402-amd64.deb
-sudo dpkg -i rstudio-2023.12.1-402-amd64.deb
-rm rstudio-*-amd64.deb
-```
-
-
-Finally, install xdmod-data python API:
-
-```bash
-pip install --upgrade 'xdmod-data>=1.0.0,<2.0.0' python-dotenv tabulate
-```
-
-Launch rserver at <http://localhost:8787>
-
-## Obtain an XDMoD-API token
-
-You will need to get XDMoD-API token in order to access XDMoD Analytical Framework.
-Follow [these instructions](https://github.com/ubccr/xdmod-data#api-token-access) to obtain an API token.
-Write the token to `~/xdmod-data.env` file. It will be loaded soon and you would not need to keep token in Rmarkdown file
-
-```bash
-cat >> ~/.Renviron << EOF
-XDMOD_API_TOKEN=<my secret xdmod api token>
-EOF
-```
-# Use XDMoD Analytical Framework as Python API
-
 `rxdmod` uses the Python API through `reticulate` R library.
 So it is importent to load `reticulate` then python with 'xdmod-data' installed.
 
@@ -90,7 +41,6 @@ use_condaenv("xdmod-notebooks")
 
 library(rxdmod)
 ```
-
 
 
 First, initialize the XDMoD Data Warehouse.

@@ -26,15 +26,15 @@ XDMoD.
 
 ## Installation
 
+
 ### Install Python API
 
+First, you need to install python with pandas. Bellow is pandas-jupyter
+complete environment for data-analysis. It is probably overkill for just
+forwarding requests through XDMoD Python API, but it can be a good
+choice for cross-language developments/work.
 
-First, you need to install python with pandas.
-Bellow is pandas-jupyter complete environment for data-analysis.
-It is probably overkill for just forwarding requests through XDMoD Python API, but
-it can be a good choice for cross-language developments/work.
-
-```bash
+``` bash
 # create a new conda environment called "xdmod-notebooks"
 conda create -n xdmod-notebooks -y python=3.11
 conda activate xdmod-notebooks
@@ -51,7 +51,15 @@ conda install -y  'altair' 'beautifulsoup4' 'bokeh' 'bottleneck' 'cloudpickle' \
 conda install -y 'pymysql' 'requests'
 ```
 
-If you don't have R yet you can install it with conda too:
+Install XDMoD Python API:
+
+```bash
+pip install --upgrade 'xdmod-data>=1.0.0,<2.0.0' python-dotenv tabulate
+```
+
+### Install RXDMoD
+
+If you don’t have R yet you can install it with conda too:
 
 ```bash
 # r-notebook  r=4.3
@@ -66,6 +74,33 @@ conda install -y \
     'r-rjson' 'r-dotenv'
 ```
 
+Install rstudio server:
+
+```bash
+wget "https://download2.rstudio.org/server/jammy/amd64/rstudio-server-2023.12.1-402-amd64.deb"
+sudo dpkg -i rstudio-server-*-amd64.deb
+rm rstudio-server-*-amd64.deb
+
+# specify which version of r to use
+echo "rsession-which-r=$(which R)" | sudo tee -a /etc/rstudio/rserver.conf
+```
+
+Alternatively you can install regular rstudio:
+
+```bash
+wget "https://download1.rstudio.org/electron/jammy/amd64/rstudio-2023.12.1-402-amd64.deb"
+sudo dpkg -i rstudio-2023.12.1-402-amd64.deb
+rm rstudio-*-amd64.deb
+```
+
+
+You can install the development version of rxdmod from
+[GitHub](https://github.com/) with:
+
+```r
+# install.packages("devtools")
+devtools::install_github("ubccr/rxdmod")
+```
 
 
 ### Set up XDMoD API Token
@@ -109,16 +144,8 @@ load_dot_env(path.expand("~/xdmod-data.env"))
 ```
 
 
-### Instal RXMoD
 
-You can install the development version of rxdmod from [GitHub](https://github.com/) with:
-
-``` r
-# install.packages("devtools")
-devtools::install_github("ubccr/rxdmod")
-```
-
-## Example
+## RXDMoD Usage Example
 
 ```{r example,results='hide',message=FALSE,warning=FALSE}
 library(tidyverse)
@@ -148,4 +175,70 @@ Plot the data
 ```{r}
 ggplot(df, aes(x=Time,y=`Number of Users: Active`)) +
         geom_line()
+```
+
+
+Get CPU hours by Resources:
+
+```{r}
+# Get Data of Interest
+df <- xdmod_get_data(dw,
+        duration=c('2024-01-01', '2024-03-31'),
+        realm='Jobs',
+        dimension='Resource',
+        metric='CPU Hours: Total'
+    ) |>
+  group_by(Resource) |>
+  summarize(`CPU Hours: Total`=sum(`CPU Hours: Total`)) %>%
+  arrange(-`CPU Hours: Total`)
+df
+```
+
+```{r}
+# Get Data of Interest
+df <- xdmod_get_data(dw,
+        duration=c('2024-01-01', '2024-03-31'),
+        realm='Jobs',
+        dimension='Resource',
+        metric='CPU Hours: Total',
+        filter=list(
+          Resource=c("Expanse","Bridges 2 RM","Purdue Anvil CPU",
+                     "STAMPEDE2 TACC","NCSA DELTA GPU")
+        )
+    )
+```
+
+Plot the data
+
+```{r}
+ggplot(df,aes(x=Time, y=`CPU Hours: Total`, color=Resource)) + 
+  geom_line() + theme_xdmod()
+# to set theme_xdmod as default:
+# theme_set(theme_xdmod())
+```
+
+
+Some other commands:
+
+```r
+# show available realms
+xdmod_describe_realms(dw)
+# show available metrics
+xdmod_describe_metrics(dw, 'Jobs')
+# show available dementions
+xdmod_describe_dimensions(dw,'Jobs')
+# show available filters
+xdmod_get_filter_values(dw, 'Jobs', 'Resource')
+# show aggregation units
+xdmod_get_aggregation_units(dw)
+# get raw, job-level, data
+df <- xdmod_get_raw_data(dw,
+    duration=c("2024-01-01", "2024-01-31"),
+    realm='SUPREMM',
+    filters=list(Application=c("gromacs","amber","charmm","lammps","namd")),
+    convert_timestamp=TRUE,
+    strings_as_factors=FALSE
+)
+# set XDMoD theme for ggplot
+theme_set(theme_xdmod())
 ```

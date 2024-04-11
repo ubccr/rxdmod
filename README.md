@@ -37,6 +37,14 @@ conda install -y  'altair' 'beautifulsoup4' 'bokeh' 'bottleneck' 'cloudpickle' \
 conda install -y 'pymysql' 'requests'
 ```
 
+Install XDMoD Python API:
+
+``` bash
+pip install --upgrade 'xdmod-data>=1.0.0,<2.0.0' python-dotenv tabulate
+```
+
+### Install RXDMoD
+
 If you don’t have R yet you can install it with conda too:
 
 ``` bash
@@ -50,6 +58,33 @@ conda install -y 'r-base' 'r-caret' 'r-crayon' 'r-devtools' 'r-e1071' \
 conda install -y \
     'r-plotly' 'r-repr' 'r-irdisplay' 'r-pbdzmq' 'r-reticulate' 'r-cowplot' \
     'r-rjson' 'r-dotenv'
+```
+
+Install rstudio server:
+
+``` bash
+wget "https://download2.rstudio.org/server/jammy/amd64/rstudio-server-2023.12.1-402-amd64.deb"
+sudo dpkg -i rstudio-server-*-amd64.deb
+rm rstudio-server-*-amd64.deb
+
+# specify which version of r to use
+echo "rsession-which-r=$(which R)" | sudo tee -a /etc/rstudio/rserver.conf
+```
+
+Alternatively you can install regular rstudio:
+
+``` bash
+wget "https://download1.rstudio.org/electron/jammy/amd64/rstudio-2023.12.1-402-amd64.deb"
+sudo dpkg -i rstudio-2023.12.1-402-amd64.deb
+rm rstudio-*-amd64.deb
+```
+
+You can install the development version of rxdmod from
+[GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("ubccr/rxdmod")
 ```
 
 ### Set up XDMoD API Token
@@ -97,17 +132,7 @@ library(dotenv)
 load_dot_env(path.expand("~/xdmod-data.env"))
 ```
 
-### Instal RXMoD
-
-You can install the development version of rxdmod from
-[GitHub](https://github.com/) with:
-
-``` r
-# install.packages("devtools")
-devtools::install_github("ubccr/rxdmod")
-```
-
-## Example
+## RXDMoD Usage Example
 
 ``` r
 library(tidyverse)
@@ -140,3 +165,94 @@ ggplot(df, aes(x=Time,y=`Number of Users: Active`)) +
 ```
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+
+Get CPU hours by Resources:
+
+``` r
+# Get Data of Interest
+df <- xdmod_get_data(dw,
+        duration=c('2024-01-01', '2024-03-31'),
+        realm='Jobs',
+        dimension='Resource',
+        metric='CPU Hours: Total'
+    ) |>
+  group_by(Resource) |>
+  summarize(`CPU Hours: Total`=sum(`CPU Hours: Total`)) %>%
+  arrange(-`CPU Hours: Total`)
+df
+#> # A tibble: 19 × 2
+#>    Resource           `CPU Hours: Total`
+#>    <chr>                           <dbl>
+#>  1 Expanse                    125104639.
+#>  2 Bridges 2 RM               109010078.
+#>  3 Purdue Anvil CPU           105480095.
+#>  4 STAMPEDE2 TACC              19728084.
+#>  5 NCSA DELTA GPU              16517194.
+#>  6 NCSA DELTA CPU               8134046.
+#>  7 Texas A&M U FASTER           4646842.
+#>  8 IACS Ookami                  1767962.
+#>  9 Bridges 2 GPU                1498234.
+#> 10 Expanse GPU                  1447462.
+#> 11 UD DARWIN                    1043574.
+#> 12 Purdue Anvil GPU              718512.
+#> 13 Bridges 2 EM                  436539.
+#> 14 TACC STAMPEDE3                281434.
+#> 15 JHU Rockfish RM               115646.
+#> 16 UD DARWIN GPU                   1095.
+#> 17 KyRIC                           1002.
+#> 18 PSC Neocortex                    805.
+#> 19 Bridges2 GPU AI                  194.
+```
+
+``` r
+# Get Data of Interest
+df <- xdmod_get_data(dw,
+        duration=c('2024-01-01', '2024-03-31'),
+        realm='Jobs',
+        dimension='Resource',
+        metric='CPU Hours: Total',
+        filter=list(
+          Resource=c("Expanse","Bridges 2 RM","Purdue Anvil CPU",
+                     "STAMPEDE2 TACC","NCSA DELTA GPU")
+        )
+    )
+```
+
+Plot the data
+
+``` r
+ggplot(df,aes(x=Time, y=`CPU Hours: Total`, color=Resource)) + 
+  geom_line() + theme_xdmod()
+```
+
+<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
+
+``` r
+# to set theme_xdmod as default:
+# theme_set(theme_xdmod())
+```
+
+Some other commands:
+
+``` r
+# show available realms
+xdmod_describe_realms(dw)
+# show available metrics
+xdmod_describe_metrics(dw, 'Jobs')
+# show available dementions
+xdmod_describe_dimensions(dw,'Jobs')
+# show available filters
+xdmod_get_filter_values(dw, 'Jobs', 'Resource')
+# show aggregation units
+xdmod_get_aggregation_units(dw)
+# get raw, job-level, data
+df <- xdmod_get_raw_data(dw,
+    duration=c("2024-01-01", "2024-01-31"),
+    realm='SUPREMM',
+    filters=list(Application=c("gromacs","amber","charmm","lammps","namd")),
+    convert_timestamp=TRUE,
+    strings_as_factors=FALSE
+)
+# set XDMoD theme for ggplot
+theme_set(theme_xdmod())
+```
